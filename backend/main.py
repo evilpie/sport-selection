@@ -3,9 +3,13 @@
 import parser
 import logic
 import json
+import csv
 
 users = parser.parseWahl(open('feedback.csv', 'r'))
-courses = {
+courses = parser.parseKurse(open('kurs.csv', 'r'))
+
+"""
+{
     'E: Tennis': {'name': 'E: Tennis', 'max': 10, 'users': [] },
     'L: Orientierungslauf': {'name': 'L: Orientierungslauf', 'max': 10, 'users': [] },
     'E: Schwimmen': {'name': 'E: Schwimmen', 'max': 10, 'users': [] },
@@ -30,6 +34,7 @@ courses = {
     'L: Segeln': {'name': 'L: Segeln', 'max': 10, 'users': [] },
     'M: Fußball': {'name': 'M: Fußball', 'max': 10, 'users': [] }
 }
+"""
 
 def process(user):
     return logic.attach_importance(logic.normalize(user))
@@ -40,12 +45,22 @@ print 'Users: %d Courses: %d' % (len(users), len(courses.values()))
 print 'Begin selection process ... (This may take a while)'
 
 logic.draw(users, logic.Q1, list(courses.values()))
+logic.draw(users, logic.Q2, list(courses.values()))
+
+writer = csv.DictWriter(open('output.csv', 'w'), ('Anmeldename', 'Q1', 'Q1-Rating', 'Q2', 'Q2-Rating'))
 
 for user in users:
-    print user['name']
-    print '  Wanted: ',
-    for selection in user['selection'][logic.Q1]:
-        print selection['name'],
-    print '\n  Got: ' + user['result'][logic.Q1] + '\n'
-    
-json.dump(users, open('output.json', 'w'))
+    def index(year):
+        index = 1
+        for selection in user['selection'][year]:
+            if selection['name'] == user['result'][year]:
+                return str(index)
+            index += 1
+        return '-1'
+
+    writer.writerow({'Anmeldename': user['login'], 
+                     'Q1': user['result'][logic.Q1], 
+                     'Q1-Rating': index(logic.Q1),
+                     'Q2': user['result'][logic.Q2], 
+                     'Q2-Rating': index(logic.Q2)
+                     })

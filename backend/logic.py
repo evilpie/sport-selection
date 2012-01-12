@@ -36,9 +36,6 @@ def attach_importance(user):
 
 
 def draw(users, year, courses):
-    matrix = []
-    counter = {}
-
     """
     We produce the following matrix
         [
@@ -57,6 +54,7 @@ def draw(users, year, courses):
     This works well when the number of users is < 200 and the number of items < 30.
     """
 
+    matrix = []
     for user in users:
         x = []
         for course in courses:
@@ -68,7 +66,6 @@ def draw(users, year, courses):
                         want = True
                 if not want:
                     x.append(10)
-
         matrix.append(x)
 
     start = datetime.datetime.now()
@@ -76,9 +73,16 @@ def draw(users, year, courses):
     indexes = m.compute(matrix)
     print 'Computation took: ' + str(datetime.datetime.now() - start)
 
+    counter = {}
     good = 0
+
+    if len(indexes) < len(users):
+        raise Exception('Could not calculate any sane result!')
+
     for row, column in indexes:
         index = 0
+
+        # try to match the course from the colum index
         for course in courses:
             index += course['max']
             if column <= index:

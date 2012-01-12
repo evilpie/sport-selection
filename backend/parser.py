@@ -26,3 +26,19 @@ def parseWahl(file):
 
     return users
 
+def parseKurse(file):
+    reader = csv.reader(file)
+
+    map = {}
+
+    for row in reader:
+        name, max = row
+
+        map[name] = {
+            'name': name,
+            'max': int(max),
+            'users': []
+        }
+
+    return map
+    
